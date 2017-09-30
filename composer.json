@@ -1,0 +1,26 @@
+{
+    "name": "pvbogdanov/slave-market",
+    "description": "Test task for PHP developers",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Pavel Bogdanov",
+            "email": "p.bogdanov@ibc.ru"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "SlaveMarket\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SlaveMarket\\": "tests/"
+        }
+    },
+    "require": {},
+    "require-dev": {
+        "phpunit/phpunit": "^6.0"
+    }
+}
