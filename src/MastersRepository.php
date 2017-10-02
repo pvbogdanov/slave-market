@@ -7,7 +7,7 @@ namespace SlaveMarket;
  *
  * @package SlaveMarket
  */
-interface MasterRepository
+interface MastersRepository
 {
     /**
      * Возвращает хозяина по его id

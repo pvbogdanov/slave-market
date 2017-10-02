@@ -7,7 +7,7 @@ namespace SlaveMarket;
  *
  * @package SlaveMarket
  */
-interface SlaveRepository
+interface SlavesRepository
 {
     /**
      * Возвращает раба по его id

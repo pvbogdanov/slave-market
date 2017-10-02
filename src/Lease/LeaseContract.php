@@ -18,12 +18,17 @@ class LeaseContract
     /** @var Slave Раб */
     public $slave;
 
+    /** @var float Стоимость */
+    public $price = 0;
+
     /** @var LeaseHour[] Список арендованных часов */
     public $leasedHours = [];
 
-    public function __construct(Master $master, Slave $slave, array $leasedHours)
+    public function __construct(Master $master, Slave $slave, float $price, array $leasedHours)
     {
-        $this->master = $master;
-        $this->slave  = $slave;
+        $this->master      = $master;
+        $this->slave       = $slave;
+        $this->price       = $price;
+        $this->leasedHours = $leasedHours;
     }
 }

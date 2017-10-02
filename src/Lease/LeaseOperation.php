@@ -2,8 +2,8 @@
 
 namespace SlaveMarket\Lease;
 
-use SlaveMarket\MasterRepository;
-use SlaveMarket\SlaveRepository;
+use SlaveMarket\MastersRepository;
+use SlaveMarket\SlavesRepository;
 
 /**
  * Операция "Арендовать раба"
@@ -18,12 +18,12 @@ class LeaseOperation
     protected $contractsRepository;
 
     /**
-     * @var MasterRepository
+     * @var MastersRepository
      */
     protected $mastersRepository;
 
     /**
-     * @var SlaveRepository
+     * @var SlavesRepository
      */
     protected $slavesRepository;
 
@@ -31,10 +31,10 @@ class LeaseOperation
      * LeaseOperation constructor.
      *
      * @param LeaseContractsRepository $contractsRepo
-     * @param MasterRepository $mastersRepo
-     * @param SlaveRepository $slavesRepo
+     * @param MastersRepository $mastersRepo
+     * @param SlavesRepository $slavesRepo
      */
-    public function __construct(LeaseContractsRepository $contractsRepo, MasterRepository $mastersRepo, SlaveRepository $slavesRepo)
+    public function __construct(LeaseContractsRepository $contractsRepo, MastersRepository $mastersRepo, SlavesRepository $slavesRepo)
     {
         $this->contractsRepository = $contractsRepo;
         $this->mastersRepository   = $mastersRepo;

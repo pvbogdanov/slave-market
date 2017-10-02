@@ -4,9 +4,9 @@ namespace SlaveMarket\Lease;
 
 use PHPUnit\Framework\TestCase;
 use SlaveMarket\Master;
-use SlaveMarket\MasterRepository;
+use SlaveMarket\MastersRepository;
 use SlaveMarket\Slave;
-use SlaveMarket\SlaveRepository;
+use SlaveMarket\SlavesRepository;
 
 /**
  * Тесты операции аренды раба
@@ -19,11 +19,11 @@ class LeaseOperationTest extends TestCase
      * Stub репозитория хозяев
      *
      * @param Master[] ...$masters
-     * @return MasterRepository
+     * @return MastersRepository
      */
-    private function makeFakeMasterRepository(...$masters): MasterRepository
+    private function makeFakeMasterRepository(...$masters): MastersRepository
     {
-        $mastersRepository = $this->prophesize(MasterRepository::class);
+        $mastersRepository = $this->prophesize(MastersRepository::class);
         foreach ($masters as $master) {
             $mastersRepository->getById($master->getId())->willReturn($master);
         }
@@ -35,11 +35,11 @@ class LeaseOperationTest extends TestCase
      * Stub репозитория рабов
      *
      * @param Slave[] ...$slaves
-     * @return SlaveRepository
+     * @return SlavesRepository
      */
-    private function makeFakeSlaveRepository(...$slaves): SlaveRepository
+    private function makeFakeSlaveRepository(...$slaves): SlavesRepository
     {
-        $slavesRepository = $this->prophesize(SlaveRepository::class);
+        $slavesRepository = $this->prophesize(SlavesRepository::class);
         foreach ($slaves as $slave) {
             $slavesRepository->getById($slave->getId())->willReturn($slave);
         }
@@ -64,13 +64,14 @@ class LeaseOperationTest extends TestCase
             $slaveRepo = $this->makeFakeSlaveRepository($slave1);
 
             // Договор аренды. 1й хозяин арендовал раба
-            $leaseContract1 = new LeaseContract($master1, $slave1, [
+            $leaseContract1 = new LeaseContract($master1, $slave1, 80, [
                 new LeaseHour('2017-01-01 00'),
                 new LeaseHour('2017-01-01 01'),
                 new LeaseHour('2017-01-01 02'),
                 new LeaseHour('2017-01-01 03'),
             ]);
 
+            // Stub репозитория договоров
             $contractsRepo = $this->prophesize(LeaseContractsRepository::class);
             $contractsRepo
                 ->getForSlave($slave1->getId(), '2017-01-01', '2017-01-01')
@@ -134,5 +135,6 @@ class LeaseOperationTest extends TestCase
         // -- Assert
         $this->assertEmpty($response->getErrors());
         $this->assertInstanceOf(LeaseContract::class, $response->getLeaseContract());
+        $this->assertEquals(40, $response->getLeaseContract()->price);
     }
 }
