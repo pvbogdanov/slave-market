@@ -20,7 +20,7 @@ class LeaseResponse
      *
      * @return LeaseContract
      */
-    public function getLeaseContract(): ?LeaseContract
+    public function getLeaseContract()
     {
         return $this->leaseContract;
     }
@@ -40,7 +40,7 @@ class LeaseResponse
      *
      * @param string $message
      */
-    public function addError(string $message): void
+    public function addError(string $message)
     {
         $this->errors[] = $message;
     }

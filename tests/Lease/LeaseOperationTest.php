@@ -74,7 +74,7 @@ class LeaseOperationTest extends TestCase
             // Stub репозитория договоров
             $contractsRepo = $this->prophesize(LeaseContractsRepository::class);
             $contractsRepo
-                ->getForSlave($slave1->getId(), '2017-01-01', '2017-01-01')
+                ->getForSlave($slave1->getId(), "2017-01-01 02", "2017-01-01 02")
                 ->willReturn([$leaseContract1]);
 
             // Запрос на новую аренду. 2й хозяин выбрал занятое время
@@ -92,9 +92,9 @@ class LeaseOperationTest extends TestCase
         $response = $leaseOperation->run($leaseRequest);
 
         // -- Assert
-        $expectedErrors = ['Ошибка. Раб #1 "Уродливый Фред" занят. Занятые часы: "2017-01-01 01", "2017-01-01 02"'];
+        $expectedErrors = 'Ошибка. Раб #1 "Уродливый Фред" занят. Занятые часы: "2017-01-01 00", "2017-01-01 01", "2017-01-01 02", "2017-01-01 03"';
 
-        $this->assertArraySubset($expectedErrors, $response->getErrors());
+        $this->assertEquals($expectedErrors, $response->getErrors()[0]);
         $this->assertNull($response->getLeaseContract());
     }
 
@@ -110,12 +110,12 @@ class LeaseOperationTest extends TestCase
             $masterRepo = $this->makeFakeMasterRepository($master1);
 
             // Раб
-            $slave1    = new Slave(1, 'Уродливый Фред', 20);
+            $slave1    = new Slave(2, 'Красивый Фред', 20);
             $slaveRepo = $this->makeFakeSlaveRepository($slave1);
 
             $contractsRepo = $this->prophesize(LeaseContractsRepository::class);
             $contractsRepo
-                ->getForSlave($slave1->getId(), '2017-01-01', '2017-01-01')
+                ->getForSlave($slave1->getId(), '2017-01-01 02', '2017-01-01 02')
                 ->willReturn([]);
 
             // Запрос на новую аренду
@@ -124,6 +124,7 @@ class LeaseOperationTest extends TestCase
             $leaseRequest->slaveId  = $slave1->getId();
             $leaseRequest->timeFrom = '2017-01-01 01:30:00';
             $leaseRequest->timeTo   = '2017-01-01 02:01:00';
+
 
             // Операция аренды
             $leaseOperation = new LeaseOperation($contractsRepo->reveal(), $masterRepo, $slaveRepo);
@@ -135,6 +136,8 @@ class LeaseOperationTest extends TestCase
         // -- Assert
         $this->assertEmpty($response->getErrors());
         $this->assertInstanceOf(LeaseContract::class, $response->getLeaseContract());
-        $this->assertEquals(40, $response->getLeaseContract()->price);
+        $this->assertEquals(20.0, $response->getLeaseContract()->price);
     }
+
+
 }
