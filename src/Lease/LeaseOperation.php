@@ -38,7 +38,7 @@ class LeaseOperation
      * @param Slave $slave
      * @return float
      */
-    protected function priceCalculation(DateInterval $interval, Slave $slave) : float
+    protected function calculatePrice(DateInterval $interval, Slave $slave) : float
     {
         return $interval->h == 0 ? (float)$slave->getPricePerHour() : (float)(($interval->h + ($interval->d * 16)) * $slave->getPricePerHour());
     }
@@ -78,7 +78,7 @@ class LeaseOperation
         
         $interval = $secondTime->getDateTime()->diff($firstTime->getDateTime());
 
-        $price = $this->priceCalculation($interval, $slave);
+        $price = $this->calculatePrice($interval, $slave);
         
         $leaseHours = $this->formLeaseHours($firstTime, $secondTime);
 
@@ -96,13 +96,13 @@ class LeaseOperation
      * @param string $time
      * @return string
      */
-    protected function timeModify(string $time) : string
+    protected function modifyTime(string $time) : string
     {
         $timeStart = new \DateTime($time);
         return $timeStart->modify("+30 minutes")->format('Y-m-d H');
     }
 
-    public function busyHoursString(array $leaseHours) : string
+    public function formBusyHoursString(array $leaseHours) : string
     {
         $hours = array();
         foreach ($leaseHours as $leaseHour) {
@@ -136,8 +136,8 @@ class LeaseOperation
     {
         $response = new LeaseResponse();
 
-        $request->timeFrom = $this->timeModify($request->timeFrom);
-        $request->timeTo = $this->timeModify($request->timeTo);
+        $request->timeFrom = $this->modifyTime($request->timeFrom);
+        $request->timeTo = $this->modifyTime($request->timeTo);
         
         $contracts = $this->contractsRepository->getForSlave($request->slaveId, $request->timeFrom, $request->timeTo);
 
@@ -149,7 +149,7 @@ class LeaseOperation
         } else {
             foreach ($contracts as $contract) {
                 if ($contract->master->isVIP() || !$master->isVIP()) {
-                    $response->addError('Ошибка. Раб #'.$request->slaveId.' "'.$slave->getName().'" занят. Занятые часы: '.$this->busyHoursString($contract->leasedHours));
+                    $response->addError('Ошибка. Раб #'.$request->slaveId.' "'.$slave->getName().'" занят. Занятые часы: '.$this->formBusyHoursString($contract->leasedHours));
                 }
             }
 
