@@ -2,6 +2,9 @@
 
 namespace SlaveMarket;
 
+use SlaveMarket\Lease\LeaseContract;
+use SlaveMarket\Lease\LeaseHour;
+
 /**
  * Раб (Бедняга :-()
  *
@@ -60,5 +63,58 @@ class Slave
     public function getPricePerHour(): float
     {
         return $this->pricePerHour;
+    }
+
+    /**
+     * @param LeaseHour[] $hours
+     * @return float
+     */
+    public function getPricePerHours(array $hours): float
+    {
+        $days = [];
+        foreach ($hours as $leasedHour) {
+            $days[$leasedHour->getDate()][] = $leasedHour;
+        }
+
+        $result = 0;
+        foreach ($days as $day) {
+            for ($i = 0, $count = count($hours); $i < $count; $i++) {
+                if ($i >= LeaseHour::MAX_HOUR_IN_DAY) {
+                    break;
+                }
+                $result += $this->pricePerHour;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param LeaseHour[] $hours
+     * @param LeaseContract[] $leaseContracts
+     * @return bool
+     */
+    public static function canAddedHours(array $hours, array $leaseContracts): bool
+    {
+        $days = [];
+        foreach ($hours as $leasedHour) {
+            $days[$leasedHour->getDate()][] = $leasedHour;
+        }
+        if (count($days) > 1) {
+            return true;
+        }
+
+        foreach ($leaseContracts as $leaseContract) {
+            $hoursInDay = $leaseContract->hoursInDay;
+
+            if (array_key_exists(key($hoursInDay), $days)) {
+                $hoursInDay = count(current($hoursInDay)) + count($days[key($hoursInDay)]);
+               if ($hoursInDay > LeaseHour::MAX_HOUR_IN_DAY) {
+                   return false;
+               }
+            }
+        }
+
+        return true;
     }
 }

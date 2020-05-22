@@ -3,6 +3,7 @@
 namespace SlaveMarket\Lease;
 
 use SlaveMarket\MastersRepository;
+use SlaveMarket\Slave;
 use SlaveMarket\SlavesRepository;
 
 /**
@@ -37,8 +38,8 @@ class LeaseOperation
     public function __construct(LeaseContractsRepository $contractsRepo, MastersRepository $mastersRepo, SlavesRepository $slavesRepo)
     {
         $this->contractsRepository = $contractsRepo;
-        $this->mastersRepository   = $mastersRepo;
-        $this->slavesRepository    = $slavesRepo;
+        $this->mastersRepository = $mastersRepo;
+        $this->slavesRepository = $slavesRepo;
     }
 
     /**
@@ -49,6 +50,50 @@ class LeaseOperation
      */
     public function run(LeaseRequest $request): LeaseResponse
     {
-        // Your code here :-)
+        $result = new LeaseResponse();
+        $slave = $this->slavesRepository->getById($request->slaveId);
+        $master = $this->mastersRepository->getById($request->masterId);
+        $leaseContracts = $this->contractsRepository->getForSlave(
+            $request->slaveId,
+            LeaseHour::fromString($request->timeFrom)->getDate(),
+            LeaseHour::fromString($request->timeTo)->getDate(),
+        );
+        $hours = LeaseHour::getHours($request->timeFrom, $request->timeTo);
+
+        if (empty($leaseContracts)) {
+            $result->setLeaseContract(new LeaseContract($master, $slave, $slave->getPricePerHours($hours), $hours));
+            return $result;
+        }
+
+        $leaseHour = LeaseHour::checkInterval($leaseContracts, $request->timeFrom, $request->timeTo, $master->isVIP());
+        if ($leaseHour instanceof LeaseHour) {
+            $dateString = $leaseHour->getDateString();
+            $result->addError(
+                sprintf(
+                    'Ошибка. Раб #%d "%s" занят. Занятые часы: "%s", "%s"',
+                    $slave->getId(),
+                    $slave->getName(),
+                    $dateString,
+                    $leaseHour->modify('+1 hour')->getDateString(),
+                )
+            );
+
+            return $result;
+        }
+
+        if (Slave::canAddedHours($hours, $leaseContracts)) {
+            $result->setLeaseContract(new LeaseContract($master, $slave, $slave->getPricePerHours($hours), $hours));
+        } else {
+            $result->addError(
+                sprintf(
+                    'Ошибка. Раб #%d "%s" не может работать больше %d часов в день.',
+                    $slave->getId(),
+                    $slave->getName(),
+                    LeaseHour::MAX_HOUR_IN_DAY,
+                )
+            );
+        }
+
+        return $result;
     }
 }

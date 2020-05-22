@@ -24,11 +24,16 @@ class LeaseContract
     /** @var LeaseHour[] Список арендованных часов */
     public $leasedHours = [];
 
+    public $hoursInDay = [];
+
     public function __construct(Master $master, Slave $slave, float $price, array $leasedHours)
     {
         $this->master      = $master;
         $this->slave       = $slave;
         $this->price       = $price;
         $this->leasedHours = $leasedHours;
+        foreach ($this->leasedHours as $leasedHour) {
+            $this->hoursInDay[$leasedHour->getDate()][] = $leasedHour;
+        }
     }
 }
