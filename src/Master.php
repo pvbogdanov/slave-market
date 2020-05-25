@@ -18,6 +18,15 @@ class Master
     /** @var bool является ли VIP-клиентом */
     protected $isVIP;
 
+    private const LEVELS = [
+        'GOLD' => 3,
+        'SILVER' => 2,
+        'BRONZE' => 1,
+        'DEFAULT' => 0,
+    ];
+
+    private string $level = 'DEFAULT';
+
     /**
      * Master constructor.
      *
@@ -60,5 +69,21 @@ class Master
     public function isVIP(): bool
     {
         return $this->isVIP;
+    }
+
+    public function setLevel(string $level): void
+    {
+        $this->level = $level;
+    }
+
+    public function getLevel(): string
+    {
+        return $this->level;
+    }
+
+    public function canRent(self $master): bool
+    {
+        return ($this->isVIP && !$master->isVIP())
+            || self::LEVELS[$this->level] > self::LEVELS[$master->getLevel()];
     }
 }
