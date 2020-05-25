@@ -6,6 +6,7 @@ use App\Domain\Shared\Exception\UnexpectedValueException;
 use App\Domain\Shared\ValueObject\DateTimeRange;
 use DateTime;
 use Ramsey\Uuid\Uuid;
+use SlaveMarket\Master;
 
 /**
  * Арендованный час
@@ -105,7 +106,7 @@ class LeaseHour
         return $result;
     }
 
-    public static function checkInterval(array $contracts, string $from, string $to, bool $isVIP): ?LeaseHour
+    public static function checkInterval(array $contracts, string $from, string $to, Master $master): ?LeaseHour
     {
         /** @var LeaseContract $contract */
         foreach ($contracts as $contract) {
@@ -128,8 +129,7 @@ class LeaseHour
 
                 if (
                     null !== $next
-                    && !$isVIP
-                    && !$contract->master->isVIP()
+                    && !$master->canRent($contract->master)
                     && $current->getDateString() >= $next->getDateString()
                 ) {
                     return $current;

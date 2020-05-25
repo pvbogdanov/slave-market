@@ -24,7 +24,7 @@ class LeaseHourTest extends TestCase
      */
     public function testCheckInterval(array $contracts, string $from, string $to): void
     {
-        static::assertNull(LeaseHour::checkInterval($contracts, $from, $to, false));
+        static::assertNull(LeaseHour::checkInterval($contracts, $from, $to, new Master(1, 's')));
     }
 
     /**
@@ -32,7 +32,7 @@ class LeaseHourTest extends TestCase
      */
     public function testIncorrectCheckInterval(array $contracts, string $from, string $to): void
     {
-        static::assertInstanceOf(LeaseHour::class, LeaseHour::checkInterval($contracts, $from, $to, false));
+        static::assertInstanceOf(LeaseHour::class, LeaseHour::checkInterval($contracts, $from, $to, new Master(1, 's')));
     }
 
     public function hoursProvider(): array
