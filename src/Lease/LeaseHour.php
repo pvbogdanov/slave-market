@@ -58,6 +58,7 @@ class LeaseHour
         return $this->dateTime->format('Y-m-d');
     }
 
+
     /**
      * Возвращает час аренды
      *
