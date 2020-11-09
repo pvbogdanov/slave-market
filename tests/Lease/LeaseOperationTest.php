@@ -90,6 +90,12 @@ class LeaseOperationTest extends TestCase
             static::$CONTRACTS_REPO
                 ->getForSlave($slave1->getId(), '2018-01-01 01', '2018-01-01 02')
                 ->willReturn([]);
+            static::$CONTRACTS_REPO
+                ->getForSlave($slave1->getId(), '2018-01-01 01', '2018-01-01 17')
+                ->willReturn([]);
+            static::$CONTRACTS_REPO
+                ->getForSlave($slave1->getId(), '2018-01-01 01', '2018-01-02 22')
+                ->willReturn([]);
         }
     }
 

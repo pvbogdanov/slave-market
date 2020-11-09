@@ -57,23 +57,36 @@ class LeaseRequest
     {
         $validationErrors = [];
         if (null === $this->master) {
-            $validationErrors[] = "Ошибка. Мастер не найден";
+            $validationErrors[] = 'Ошибка. Мастер не найден';
         }
         if (null === $this->slave) {
-            $validationErrors[] = "Ошибка. Раб не найден";
+            $validationErrors[] = 'Ошибка. Раб не найден';
         }
         if (false === $this->dateFrom) {
-            $validationErrors[] = "Ошибка. Дата начала имеет неверный формат";
+            $validationErrors[] = 'Ошибка. Дата начала имеет неверный формат';
         }
         if (false === $this->dateTo) {
-            $validationErrors[] = "Ошибка. Дата конца имеет неверный формат";
+            $validationErrors[] = 'Ошибка. Дата конца имеет неверный формат';
         }
         if (
             false !== $this->dateFrom &&
-            false !== $this->dateTo &&
-            $this->dateTo <= $this->dateFrom
+            false !== $this->dateTo
         ) {
-            $validationErrors[] = "Ошибка. Дата конца меньше даты начала";
+            if ($this->dateTo <= $this->dateFrom) {
+                $validationErrors[] = 'Ошибка. Дата конца меньше даты начала';
+            }
+            if (
+                $this->dateFrom->format('Y-m-d') === $this->dateTo->format('Y-m-d') &&
+                (
+                    $this->dateTo->format('H') - $this->dateFrom->format('H') > 16 ||
+                    (
+                        $this->dateTo->format('H') - $this->dateFrom->format('H') == 16 &&
+                        $this->dateTo->format('i:s') > '00:00'
+                    )
+                ) 
+            ) {
+                $validationErrors[] = 'Ошибка. Указано более 16 часов';
+            }
         }
 
         return $validationErrors;
