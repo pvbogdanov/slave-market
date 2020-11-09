@@ -65,7 +65,8 @@ class LeaseOperation
         $leaseContracts = $this->contractsRepository->getForSlave(
             $request->slave->getId(),
             $request->dateFrom->format(LeaseHour::FORMAT),
-            $dateTo->format(LeaseHour::FORMAT)
+            $dateTo->format(LeaseHour::FORMAT),
+            $request->master->isVIP()
         );
         if (count($leaseContracts) > 0) {
             $leaseResponse->addOccupiedError(

@@ -69,9 +69,10 @@ class LeaseOperationTest extends TestCase
             static::$IS_REPO_SET_UP = true;
 
             // Хозяева
-            $master1    = new Master(1, 'Господин Боб');
+            $master1    = new Master(1, 'Господин Боб', true);
             $master2    = new Master(2, 'сэр Вонючка');
-            static::$MASTER_REPO = $this->makeFakeMasterRepository($master1, $master2);
+            $master3    = new Master(3, 'Господин Билл', true);
+            static::$MASTER_REPO = $this->makeFakeMasterRepository($master1, $master2, $master3);
 
             // Раб
             $slave1    = new Slave(1, 'Уродливый Фред', 20);
@@ -82,25 +83,38 @@ class LeaseOperationTest extends TestCase
                 new LeaseHour('2017-01-01 01'),
                 new LeaseHour('2017-01-01 02'),
             ]);
+            $leaseContract2 = new LeaseContract($master2, $slave1, 80, [
+                new LeaseHour('2017-01-02 01'),
+                new LeaseHour('2017-01-02 02'),
+            ]);
 
             static::$CONTRACTS_REPO = $this->prophesize(LeaseContractsRepository::class);
             static::$CONTRACTS_REPO
-                ->getForSlave($slave1->getId(), '2017-01-01 01', '2017-01-01 02')
+                ->getForSlave($slave1->getId(), '2017-01-01 01', '2017-01-01 02', false)
                 ->willReturn([$leaseContract1]);
             static::$CONTRACTS_REPO
-                ->getForSlave($slave1->getId(), '2018-01-01 01', '2018-01-01 02')
+                ->getForSlave($slave1->getId(), '2017-01-01 01', '2017-01-01 02', true)
+                ->willReturn([$leaseContract1]);
+            static::$CONTRACTS_REPO
+                ->getForSlave($slave1->getId(), '2017-01-02 01', '2017-01-02 02', false)
+                ->willReturn([$leaseContract2]);
+            static::$CONTRACTS_REPO
+                ->getForSlave($slave1->getId(), '2017-01-02 01', '2017-01-02 02', true)
                 ->willReturn([]);
             static::$CONTRACTS_REPO
-                ->getForSlave($slave1->getId(), '2018-01-01 01', '2018-01-01 16')
+                ->getForSlave($slave1->getId(), '2018-01-01 01', '2018-01-01 02', true)
                 ->willReturn([]);
             static::$CONTRACTS_REPO
-                ->getForSlave($slave1->getId(), '2018-01-01 01', '2018-01-02 21')
+                ->getForSlave($slave1->getId(), '2018-01-01 01', '2018-01-01 16', true)
                 ->willReturn([]);
             static::$CONTRACTS_REPO
-                ->getForSlave($slave1->getId(), '2018-01-01 11', '2018-01-01 23')
+                ->getForSlave($slave1->getId(), '2018-01-01 01', '2018-01-02 21', true)
                 ->willReturn([]);
             static::$CONTRACTS_REPO
-                ->getForSlave($slave1->getId(), '2018-01-01 11', '2018-01-02 00')
+                ->getForSlave($slave1->getId(), '2018-01-01 11', '2018-01-01 23', true)
+                ->willReturn([]);
+            static::$CONTRACTS_REPO
+                ->getForSlave($slave1->getId(), '2018-01-01 11', '2018-01-02 00', true)
                 ->willReturn([]);
         }
     }
@@ -117,7 +131,7 @@ class LeaseOperationTest extends TestCase
         foreach ($masters as $master) {
             $mastersRepository->getById($master->getId())->willReturn($master);
         }
-        $mastersRepository->getById(3)->willReturn(null);
+        $mastersRepository->getById(404)->willReturn(null);
 
         return $mastersRepository->reveal();
     }
@@ -134,7 +148,7 @@ class LeaseOperationTest extends TestCase
         foreach ($slaves as $slave) {
             $slavesRepository->getById($slave->getId())->willReturn($slave);
         }
-        $slavesRepository->getById(3)->willReturn(null);
+        $slavesRepository->getById(404)->willReturn(null);
 
         return $slavesRepository->reveal();
     }

@@ -33,7 +33,7 @@ class LeaseOperationTestData
                 ],
             ],
             [
-                'masterId' => 3,
+                'masterId' => 404,
                 'slaveId' => 1,
                 'timeFrom' => '2018-01-01 01:30:00',
                 'timeTo' => '2018-01-01 02:01:00',
@@ -44,7 +44,7 @@ class LeaseOperationTestData
             ],
             [
                 'masterId' => 1,
-                'slaveId' => 3,
+                'slaveId' => 404,
                 'timeFrom' => '2018-01-01 01:30:00',
                 'timeTo' => '2018-01-01 02:01:00',
                 'expectedErrors' => [
@@ -83,8 +83,8 @@ class LeaseOperationTestData
                 'expectedContract' => [],
             ],
             [
-                'masterId' => 3,
-                'slaveId' => 3,
+                'masterId' => 404,
+                'slaveId' => 404,
                 'timeFrom' => '',
                 'timeTo' => '',
                 'expectedErrors' => [
@@ -283,6 +283,32 @@ class LeaseOperationTestData
                         '2018-01-02 21',
                         '2018-01-02 22',
                         '2018-01-02 23',
+                    ],
+                ],
+            ],
+            [
+                'masterId' => 3,
+                'slaveId' => 1,
+                'timeFrom' => '2017-01-01 01:30:00',
+                'timeTo' => '2017-01-01 02:01:00',
+                'expectedErrors' => [
+                    'Ошибка. Раб #1 "Уродливый Фред" занят. Занятые часы: "2017-01-01 01", "2017-01-01 02"',
+                ],
+                'expectedContract' => [],
+            ],
+            [
+                'masterId' => 3,
+                'slaveId' => 1,
+                'timeFrom' => '2017-01-02 01:30:00',
+                'timeTo' => '2017-01-02 02:01:00',
+                'expectedErrors' => [],
+                'expectedContract' => [
+                    'masterId' => 3,
+                    'slaveId' => 1,
+                    'price' => 40,
+                    'leasedHours' => [
+                        '2017-01-02 01',
+                        '2017-01-02 02',
                     ],
                 ],
             ],

@@ -15,7 +15,8 @@ interface LeaseContractsRepository
      * @param int $slaveId
      * @param string $dateFrom Y-m-d H
      * @param string $dateTo Y-m-d H
+     * @param bool $vipOnly
      * @return LeaseContract[]
      */
-    public function getForSlave(int $slaveId, string $dateFrom, string $dateTo) : array;
+    public function getForSlave(int $slaveId, string $dateFrom, string $dateTo, bool $vipOnly = false) : array;
 }
