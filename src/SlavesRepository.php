@@ -15,5 +15,5 @@ interface SlavesRepository
      * @param int $id
      * @return Slave
      */
-    public function getById(int $id): Slave;
+    public function getById(int $id): ?Slave;
 }

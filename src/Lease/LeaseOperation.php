@@ -51,34 +51,36 @@ class LeaseOperation
     public function run(LeaseRequest $request): LeaseResponse
     {
         $leaseResponse = new LeaseResponse();
+        if (count($request->validationErrors) > 0) {
+            foreach ($request->validationErrors as $validationError) {
+                $leaseResponse->addError($validationError);
+            }
+
+            return $leaseResponse;
+        }
         $leaseContracts = $this->contractsRepository->getForSlave(
             $request->slave->getId(),
             $request->dateFrom->format(LeaseHour::FORMAT),
             $request->dateTo->format(LeaseHour::FORMAT)
         );
         if (count($leaseContracts) > 0) {
-            $leasedHours = [];
-            foreach ($leaseContracts as $leaseContract) {
-                foreach ($leaseContract->leasedHours as $leasedHour) {
-                    $leasedHours[] = sprintf('"%s"', $leasedHour->getDateString());
-                }
-            }
             $leaseResponse->addOccupiedError(
                 $request->slave->getId(),
                 $request->slave->getName(),
-                $leasedHours
+                $leaseContracts
             );
+
+            return $leaseResponse;
         }
-        else {
-            $leaseHours = $this->getLeaseHoursBetweenDates($request->dateFrom, $request->dateTo);
-            $leaseContract = new LeaseContract(
-                $request->master,
-                $request->slave,
-                $request->slave->getPricePerHour() * count($leaseHours),
-                $leaseHours
-            );
-            $leaseResponse->setLeaseContract($leaseContract);
-        }
+        $leaseHours = $this->getLeaseHoursBetweenDates($request->dateFrom, $request->dateTo);
+        $leaseContract = new LeaseContract(
+            $request->master,
+            $request->slave,
+            $request->slave->getPricePerHour() * count($leaseHours),
+            $leaseHours
+        );
+        $leaseResponse->setLeaseContract($leaseContract);
+
         return $leaseResponse;
     }
 

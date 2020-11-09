@@ -40,9 +40,15 @@ class LeaseResponse
      *
      * @param string $message
      */
-    public function addOccupiedError(int $id, string $name, array $hours): void
+    public function addOccupiedError(int $id, string $name, array $leaseContracts): void
     {
-        $hoursString = implode(', ', $hours);
+        $leasedHours = [];
+        foreach ($leaseContracts as $leaseContract) {
+            foreach ($leaseContract->leasedHours as $leasedHour) {
+                $leasedHours[] = sprintf('"%s"', $leasedHour->getDateString());
+            }
+        }
+        $hoursString = implode(', ', $leasedHours);
         $this->addError(
             sprintf(
                 'Ошибка. Раб #%d "%s" занят. Занятые часы: %s',
@@ -68,7 +74,7 @@ class LeaseResponse
      *
      * @param string $message
      */
-    private function addError(string $message): void
+    public function addError(string $message): void
     {
         $this->errors[] = $message;
     }

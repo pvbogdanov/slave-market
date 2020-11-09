@@ -29,6 +29,9 @@ class LeaseRequest
     /** @var DateTime */
     public $dateTo;
 
+    /** @var array */
+    public $validationErrors = [];
+
     public function __construct(MastersRepository $mastersRepo, SlavesRepository $slavesRepo)
     {
         $this->mastersRepository = $mastersRepo;
@@ -45,7 +48,34 @@ class LeaseRequest
         $this->slave = $this->slavesRepository->getById($slaveId);
         $this->dateFrom = DateTime::createFromFormat(static::FORMAT, $timeFrom);
         $this->dateTo = DateTime::createFromFormat(static::FORMAT, $timeTo);
+        $this->validationErrors = $this->getValidationErrors();
 
         return $this;
+    }
+
+    private function getValidationErrors(): array
+    {
+        $validationErrors = [];
+        if (null === $this->master) {
+            $validationErrors[] = "Ошибка. Мастер не найден";
+        }
+        if (null === $this->slave) {
+            $validationErrors[] = "Ошибка. Раб не найден";
+        }
+        if (false === $this->dateFrom) {
+            $validationErrors[] = "Ошибка. Дата начала имеет неверный формат";
+        }
+        if (false === $this->dateTo) {
+            $validationErrors[] = "Ошибка. Дата конца имеет неверный формат";
+        }
+        if (
+            false !== $this->dateFrom &&
+            false !== $this->dateTo &&
+            $this->dateTo <= $this->dateFrom
+        ) {
+            $validationErrors[] = "Ошибка. Дата конца меньше даты начала";
+        }
+
+        return $validationErrors;
     }
 }
