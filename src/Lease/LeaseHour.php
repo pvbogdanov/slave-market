@@ -11,6 +11,8 @@ use DateTime;
  */
 class LeaseHour
 {
+    public const FORMAT = 'Y-m-d H';
+
     /**
      * Время начала часа
      *
@@ -25,7 +27,7 @@ class LeaseHour
      */
     public function __construct(string $dateTime)
     {
-        $this->dateTime = DateTime::createFromFormat('Y-m-d H', $dateTime);
+        $this->dateTime = DateTime::createFromFormat(static::FORMAT, $dateTime);
     }
 
     /**
@@ -35,7 +37,7 @@ class LeaseHour
      */
     public function getDateString(): string
     {
-        return $this->dateTime->format('Y-m-d H');
+        return $this->dateTime->format(static::FORMAT);
     }
 
     /**

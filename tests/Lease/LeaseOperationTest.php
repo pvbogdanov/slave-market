@@ -72,24 +72,16 @@ class LeaseOperationTest extends TestCase
         $expectedErrors,
         $expectedContract
     ) {
-        // -- Arrange
-        {
-            // Запрос на новую аренду. 2й хозяин выбрал занятое время
-            $leaseRequest           = new LeaseRequest();
-            $leaseRequest->masterId = $masterId;
-            $leaseRequest->slaveId  = $slaveId;
-            $leaseRequest->timeFrom = $timeFrom;
-            $leaseRequest->timeTo   = $timeTo;
+        // Запрос на новую аренду. 2й хозяин выбрал занятое время
+        $leaseRequest = new LeaseRequest(static::$MASTER_REPO, static::$SLAVE_REPO);
+        $leaseRequest->setData($masterId, $slaveId, $timeFrom, $timeTo);
 
-            // Операция аренды
-            $leaseOperation = new LeaseOperation(
-                static::$CONTRACTS_REPO->reveal(),
-                static::$MASTER_REPO,
-                static::$SLAVE_REPO
-            );
-        }
-
-        // -- Act
+        // Операция аренды
+        $leaseOperation = new LeaseOperation(
+            static::$CONTRACTS_REPO->reveal(),
+            static::$MASTER_REPO,
+            static::$SLAVE_REPO
+        );
         $response = $leaseOperation->run($leaseRequest);
 
         $this->assertEquals($expectedErrors, $response->getErrors());

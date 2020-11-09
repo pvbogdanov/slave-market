@@ -2,8 +2,6 @@
 
 namespace SlaveMarket\Lease;
 
-use DateInterval;
-use DatePeriod;
 use DateTime;
 use SlaveMarket\MastersRepository;
 use SlaveMarket\SlavesRepository;
@@ -53,15 +51,10 @@ class LeaseOperation
     public function run(LeaseRequest $request): LeaseResponse
     {
         $leaseResponse = new LeaseResponse();
-        $master = $this->mastersRepository->getById($request->masterId);
-        $slave = $this->slavesRepository->getById($request->slaveId);
-        $dateFrom = DateTime::createFromFormat('Y-m-d H:i:s', $request->timeFrom);
-        $dateTo = DateTime::createFromFormat('Y-m-d H:i:s', $request->timeTo);
-
         $leaseContracts = $this->contractsRepository->getForSlave(
-            $slave->getId(),
-            $dateFrom->format('Y-m-d H'),
-            $dateTo->format('Y-m-d H')
+            $request->slave->getId(),
+            $request->dateFrom->format(LeaseHour::FORMAT),
+            $request->dateTo->format(LeaseHour::FORMAT)
         );
         if (count($leaseContracts) > 0) {
             $leasedHours = [];
@@ -71,17 +64,17 @@ class LeaseOperation
                 }
             }
             $leaseResponse->addOccupiedError(
-                $slave->getId(),
-                $slave->getName(),
+                $request->slave->getId(),
+                $request->slave->getName(),
                 $leasedHours
             );
         }
         else {
-            $leaseHours = $this->getLeaseHoursBetweenDates($dateFrom, $dateTo);
+            $leaseHours = $this->getLeaseHoursBetweenDates($request->dateFrom, $request->dateTo);
             $leaseContract = new LeaseContract(
-                $master,
-                $slave,
-                $slave->getPricePerHour() * count($leaseHours),
+                $request->master,
+                $request->slave,
+                $request->slave->getPricePerHour() * count($leaseHours),
                 $leaseHours
             );
             $leaseResponse->setLeaseContract($leaseContract);
@@ -91,9 +84,9 @@ class LeaseOperation
 
     private function getLeaseHoursBetweenDates(DateTime $dateFrom, DateTime $dateTo): array
     {
-        $dateLeft = DateTime::createFromFormat('Y-m-d H', $dateFrom->format('Y-m-d H'));
+        $dateLeft = DateTime::createFromFormat(LeaseHour::FORMAT, $dateFrom->format(LeaseHour::FORMAT));
         while ($dateLeft < $dateTo) {
-            $leaseHours[] = new LeaseHour($dateLeft->format('Y-m-d H'));
+            $leaseHours[] = new LeaseHour($dateLeft->format(LeaseHour::FORMAT));
             $dateLeft->modify('+ 1 Hour');
         }
         return $leaseHours;
