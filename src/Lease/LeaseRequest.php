@@ -76,7 +76,7 @@ class LeaseRequest
                 $validationErrors[] = 'Ошибка. Дата конца меньше даты начала';
             }
             if (
-                $this->dateFrom->format('Y-m-d') === $this->dateTo->format('Y-m-d') &&
+                LeaseHour::isSameDay($this->dateFrom, $this->dateTo) &&
                 (
                     $this->dateTo->format('H') - $this->dateFrom->format('H') > 16 ||
                     (

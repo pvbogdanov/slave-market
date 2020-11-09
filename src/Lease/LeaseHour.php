@@ -69,4 +69,18 @@ class LeaseHour
     {
         return $this->dateTime->format('H');
     }
+
+    public static function isSameDay(DateTime $fromDate, DateTime $toDate): bool
+    {
+        $fromTime = strtotime($fromDate->format('Y-m-d') . ' 00:00:00');
+        $toTime = strtotime($toDate->format('Y-m-d') . ' 00:00:00');
+
+        return (
+            $fromTime === $toTime ||
+            (
+                $toTime - $fromTime === 86400 && // 24 * 60 * 60
+                $toDate->format('H:i:s') === '00:00:00'
+            )
+        );
+    }
 }

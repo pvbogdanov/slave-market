@@ -58,10 +58,14 @@ class LeaseOperation
 
             return $leaseResponse;
         }
+        $dateTo = clone $request->dateTo;
+        if ($dateTo->format('i:s') === '00:00') {
+            $dateTo->modify('- 1 Hour');
+        }
         $leaseContracts = $this->contractsRepository->getForSlave(
             $request->slave->getId(),
             $request->dateFrom->format(LeaseHour::FORMAT),
-            $request->dateTo->format(LeaseHour::FORMAT)
+            $dateTo->format(LeaseHour::FORMAT)
         );
         if (count($leaseContracts) > 0) {
             $leaseResponse->addOccupiedError(
@@ -73,10 +77,16 @@ class LeaseOperation
             return $leaseResponse;
         }
         $leaseHours = $this->getLeaseHoursBetweenDates($request->dateFrom, $request->dateTo);
+        if (LeaseHour::isSameDay($request->dateFrom, $request->dateTo)) {
+            $hoursCount = count($leaseHours);
+        } else {
+            $hoursCount = count($leaseHours) / 24 * 16;
+        }
+
         $leaseContract = new LeaseContract(
             $request->master,
             $request->slave,
-            $request->slave->getPricePerHour() * count($leaseHours),
+            $request->slave->getPricePerHour() * $hoursCount,
             $leaseHours
         );
         $leaseResponse->setLeaseContract($leaseContract);
@@ -86,8 +96,15 @@ class LeaseOperation
 
     private function getLeaseHoursBetweenDates(DateTime $dateFrom, DateTime $dateTo): array
     {
-        $dateLeft = DateTime::createFromFormat(LeaseHour::FORMAT, $dateFrom->format(LeaseHour::FORMAT));
-        while ($dateLeft < $dateTo) {
+        if (LeaseHour::isSameDay($dateFrom, $dateTo)) {
+            $dateLeft = DateTime::createFromFormat(LeaseHour::FORMAT, $dateFrom->format(LeaseHour::FORMAT));
+            $dateRight = $dateTo;
+        } else {
+            $dateLeft = DateTime::createFromFormat('Y-m-d H:i:s', $dateFrom->format('Y-m-d') . ' 00:00:00');
+            $dateRight = DateTime::createFromFormat('Y-m-d H:i:s', $dateTo->format('Y-m-d') . ' 23:00:01');
+        }
+        $leaseHours = [];
+        while ($dateLeft < $dateRight) {
             $leaseHours[] = new LeaseHour($dateLeft->format(LeaseHour::FORMAT));
             $dateLeft->modify('+ 1 Hour');
         }
