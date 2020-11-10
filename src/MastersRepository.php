@@ -15,5 +15,5 @@ interface MastersRepository
      * @param int $id
      * @return Master
      */
-    public function getById(int $id) : Master;
+    public function getById(int $id) : ?Master;
 }
